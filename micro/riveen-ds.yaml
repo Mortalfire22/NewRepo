@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testing-microservice
+  labels:
+    app: testing-microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: testing-microservice
+  template:
+    metadata:
+      labels:
+        app: testing-microservice
+    spec:
+      containers:
+      - name: testing-microservice
+        image: khalidfiyaz/testingservice:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: MICROSERVICE_URL
+          value: "ae2682a406761408bbc312075b874da7-1903900579.us-east-1.elb.amazonaws.com"
+        - name: GRAFANA_URL
+          value: "http://a07c98e7439a74c4cbdcfa449b7dfa60-149929681.us-east-1.elb.amazonaws.com:3000/d/McQOBxqSz/test-results?orgId=1"
+        - name: INFLUXDB_URL
+          value: "http://influxdb:8086"
+        - name: INFLUXDB_ORG
+          value: "myorg"
+        - name: INFLUXDB_BUCKET
+          value: "mydb"
+          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testing-microservice-service
+spec:
+  selector:
+    app: testing-microservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5001
+  type: LoadBalancer
