@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: testing-microservice
-        image: khalidfiyaz/updated:latest
+        image: khalidfiyaz/testbed
         ports:
         - containerPort: 5001
         env:
