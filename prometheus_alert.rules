@@ -1,0 +1,33 @@
+groups:
+- name: microservice_alerts
+  rules:
+  - alert: HighRequestLatency
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="microservice"}[5m])) by (le)) > 0.5
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High request latency on microservice"
+      description: "95% of requests for microservice have a latency above 0.5 seconds."
+      action: "Investigate the microservice performance issues."
+
+  - alert: ErrorRateHigh
+    expr: rate(http_requests_total{status=~"5..", job="microservice"}[5m]) / rate(http_requests_total{job="cmicroservice"}[5m]) > 0.05
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High error rate in microservice"
+      description: "More than 5% of requests are errors in the microservice."
+      action: "Check application logs and exception tracking."
+
+  - alert: ServiceDown
+    expr: up{job="microservice"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "microservice down"
+      description: "The microservice has been down for more than 1 minute."
+      action: "Check the Docker container and service logs."
+

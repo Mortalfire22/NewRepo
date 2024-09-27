@@ -1,0 +1,31 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'severity']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'monitoring-slack'
+  routes:
+  - match:
+      severity: critical
+    receiver: monitoring-pagerduty
+
+receivers:
+- name: 'monitoring-slack'
+  slack_configs:
+  - send_resolved: true
+    api_url: 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX'
+    channel: '#alerts'
+    text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+
+- name: 'monitoring-pagerduty'
+  pagerduty_configs:
+  - send_resolved: true
+    routing_key: ''
+    description: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+    details:
+      firing: "{{ .Alerts.Firing }}"
+      resolved: "{{ .Alerts.Resolved }}"
+
